@@ -4,11 +4,11 @@
 # ## 准备数据
 
 # In[7]:
-import os
-import numpy as np
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers, optimizers, datasets
+import os  #操作系统接口，用于环境变量设置
+import numpy as np #数值计算库
+import tensorflow as tf #深度学习框架
+from tensorflow import keras # TensorFlow的高级API
+from tensorflow.keras import layers, optimizers, datasets # 导入层、优化器和数据集模块
 
 # 设置TensorFlow日志级别，减少无关信息输出
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # or any {'0', '1', '2'}
