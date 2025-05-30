@@ -47,7 +47,7 @@ class RNN_model(nn.Module):
         # ???
         self.rnn_lstm = nn.LSTM(input_size=embedding_dim, hidden_size=lstm_hidden_dim, num_layers=2, batch_first=False)
 
-        #LSTM层的定义这部分已经完成，定义了一个2层的LSTM，输入大小为embedding_dim，隐藏层大小为lstm_hidden_dim，并且设置了batch_first=False（表示输入输出的张量形状为(seq_len, batch, input_size)）
+        
         ##########################################
         self.fc = nn.Linear(lstm_hidden_dim, vocab_len )
         self.apply(weights_init) # call the weights initial function.
@@ -68,11 +68,7 @@ class RNN_model(nn.Module):
             c0 = c0.cuda()
             batch_input = batch_input.cuda()
         
-        output, (hn, cn) = self.rnn_lstm(batch_input, (h0, c0))  # LSTM forward pass(LSTM的前向传播部分)
-        #初始化了隐藏状态h0和细胞状态c0，形状为(num_layers, batch_size, hidden_dim)
-        #检查并移动张量到GPU（如果可用）
-        #执行LSTM的前向传播，传入输入batch_input和初始状态(h0, c0)
-        #返回输出output和最终状态(hn, cn)
+        output, (hn, cn) = self.rnn_lstm(batch_input, (h0, c0))  # LSTM forward pass
 
         ################################################
         out = output.contiguous().view(-1,self.lstm_dim)
