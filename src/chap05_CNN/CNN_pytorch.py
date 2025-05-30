@@ -12,10 +12,10 @@ import torch.nn.functional as F  # 包含常用的函数式API，如ReLU, softma
 import numpy as np
 
 # 设置超参数
-learning_rate = 1e-4  # 学习率
-keep_prob_rate = 0.7  # Dropout保留神经元的比例
-max_epoch = 3  # 训练的总轮数
-BATCH_SIZE = 50  # 每批训练数据的大小
+learning_rate = 1e-3  # 增大学习率到0.001以加快收敛
+keep_prob_rate = 0.5  # 降低Dropout保留比例以增强正则化
+max_epoch = 10  # 增加训练轮数以获得更好的性能
+BATCH_SIZE = 100  # 增大批次大小以提高训练效率
 
 # 检查是否需要下载MNIST数据集
 DOWNLOAD_MNIST = False
