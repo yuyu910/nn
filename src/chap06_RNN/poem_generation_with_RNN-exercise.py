@@ -80,6 +80,11 @@ class myRNNModel(keras.Model):
         '''
         此处完成建模过程，可以参考Learn2Carry
         '''
+        #前向传播：输入 -> 嵌入层 -> RNN -> 全连接层 -> 输出logits
+         inp_emb = self.embed_layer(inp_ids)  # [batch_size, seq_len, emb_dim]
+        rnn_output = self.rnn_layer(inp_emb)  # [batch_size, seq_len, rnn_units]
+        logits = self.dense(rnn_output)  # [batch_size, seq_len, vocab_size]
+
         return logits
     
     @tf.function
@@ -87,13 +92,24 @@ class myRNNModel(keras.Model):
         '''
         shape(x) = [b_sz,] 
         '''
-    
+     # 单步生成：输入一个token和状态，输出下一个token和更新后的状态
         inp_emb = self.embed_layer(x) #shape(b_sz, emb_sz)
         h, state = self.rnncell.call(inp_emb, state) # shape(b_sz, h_sz)
         logits = self.dense(h) # shape(b_sz, v_sz)
         out = tf.argmax(logits, axis=-1)
         return out, state
 
+     @tf.function
+     def train_one_step(model, optimizer, x, y, seqlen):
+    
+     # 单步训练：计算损失 -> 反向传播 -> 参数更新。
+   
+    with tf.GradientTape() as tape:
+        logits = model(x)  # [batch_size, seq_len, vocab_size]
+        loss = compute_loss(logits, y, seqlen)
+    grads = tape.gradient(loss, model.trainable_variables)
+    optimizer.apply_gradients(zip(grads, model.trainable_variables))
+    return loss
 
 # ## 一个计算sequence loss的辅助函数，只需了解用途。
 
