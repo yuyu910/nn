@@ -59,6 +59,7 @@ b_conv2 = bias_variable([64])
 h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)                       # 卷积  自己选择 选择激活函数
 h_pool2 = max_pool_2x2(h_conv2)                       # 池化
 
+#卷积核大小逐渐减小(7x7 → 5x5)，输出通道数逐渐增加(32 → 64)，偏置大小与输出通道数匹配，激活函数统一使用ReLU都是合理的
 #  全连接层 1
 ## fc1 layer ##
 W_fc1 = weight_variable([7*7*64, 1024])
