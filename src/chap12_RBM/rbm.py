@@ -9,7 +9,7 @@ class RBM:
 
     def __init__(self, n_hidden=2, n_observe=784):
         """Initialize model."""
-
+        
         # 请补全此处代码
         if n_hidden <= 0 or n_observe <= 0:
             raise ValueError("Number of hidden and visible units must be positive integers.")
@@ -21,7 +21,7 @@ class RBM:
         #self.W = np.random.normal(0, 0.01, size=(n_observe, n_hidden))
         self.b_h = np.zeros(n_hidden)
         self.b_v = np.zeros(n_observe)
-        pass
+    
     def _sigmoid(self, x):
         """Sigmoid激活函数"""
         return 1.0 / (1 + np.exp(-x))
@@ -89,7 +89,7 @@ if __name__ == '__main__':
     mnist = np.load('mnist_bin.npy')  # 60000x28x28
     n_imgs, n_rows, n_cols = mnist.shape
     img_size = n_rows * n_cols
-    print mnist.shape
+    print(mnist.shape)
 
     # construct rbm model
     rbm = RBM(2, img_size)
