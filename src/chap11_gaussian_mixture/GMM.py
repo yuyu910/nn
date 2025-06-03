@@ -37,7 +37,8 @@ def generate_data(n_samples=1000):
 def logsumexp(log_p, axis=1, keepdims=False):
     #max_val = np.max(log_p, axis=axis, keepdims=True)
     #return max_val + np.log(np.sum(np.exp(log_p - max_val), axis=axis, keepdims=keepdims))
-    """优化后的logsumexp实现，包含数值稳定性增强和特殊case处理"""
+    """优化后的logsumexp实现，包含数值稳定性增强和特殊case处理""" 
+
     log_p = np.asarray(log_p)
     
     # 处理空输入情况
@@ -125,8 +126,8 @@ class GaussianMixtureModel:
         exponent = -0.5 * np.sum(X_centered @ inv * X_centered, axis=1)
         return -0.5 * n_features * np.log(2 * np.pi) - 0.5 * logdet + exponent
 
-# 主程序
-if __name__ == "__main__":
+    # 主程序
+    if __name__ == "__main__":
     X, y_true = generate_data()
     
     # 训练GMM模型
