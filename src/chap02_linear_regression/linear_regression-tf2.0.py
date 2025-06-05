@@ -13,7 +13,6 @@ def identity_basis(x):
     """恒等基函数"""
     return np.expand_dims(x, axis=1)
 
-
 def multinomial_basis(x, feature_num=10):
     """多项式基函数"""
     x = np.expand_dims(x, axis=1)  # shape(N, 1)
@@ -22,7 +21,6 @@ def multinomial_basis(x, feature_num=10):
         feat.append(x**i)
     ret = np.concatenate(feat, axis=1)
     return ret
-
 
 def gaussian_basis(x, feature_num=10):
     """高斯基函数"""
@@ -39,7 +37,6 @@ def gaussian_basis(x, feature_num=10):
     ret = np.exp(-0.5 * out ** 2)  # 对标准化距离应用高斯函数
     return ret
 
-
 def load_data(filename, basis_func=gaussian_basis):
     """载入数据"""
     xys = []
@@ -55,7 +52,6 @@ def load_data(filename, basis_func=gaussian_basis):
         phi1 = basis_func(xs)
         xs = np.concatenate([phi0, phi1], axis=1)
         return (np.float32(xs), np.float32(ys)), (o_x, o_y)
-
 
 # ## 定义模型
 class linearModel(Model):
@@ -87,7 +83,6 @@ class linearModel(Model):
         # ## 训练以及评估
         optimizer = optimizers.Adam(0.1)
 
-
 @tf.function
 def train_one_step(model, xs, ys):
     # 在梯度带(GradientTape)上下文中记录前向计算过程
@@ -98,18 +93,15 @@ def train_one_step(model, xs, ys):
     optimizer.apply_gradients([(grads, model.w)])    # 更新模型参数
     return loss
 
-
 @tf.function
 def predict(model, xs):
     y_preds = model(xs)
     return y_preds
 
-
 def evaluate(ys, ys_pred):
     """评估模型。"""
     std = np.sqrt(np.mean(np.abs(ys - ys_pred) ** 2))
     return std
-
 
 # 评估指标的计算
 for i in range(1000):
