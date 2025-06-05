@@ -1,41 +1,46 @@
 #!/usr/bin/env python
 # coding: utf-8
-
 # ## 准备数据
-
 # In[1]:
 
+# 导入操作系统接口模块，提供与操作系统交互的功能
 import os
+# 导入NumPy数值计算库，用于高效处理多维数组和矩阵运算
 import numpy as np
+# 导入TensorFlow深度学习框架
 import tensorflow as tf
+import numpy as np
+# 从TensorFlow中导入Keras高级API
 from tensorflow import keras
+# 从Keras中导入常用模块
 from tensorflow.keras import layers, optimizers, datasets
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # or any {'0', '1', '2'}
-
+#定义了一个函数mnist_dataset()，用于加载并预处理 MNIST 数据集
 def mnist_dataset():
     (x, y), (x_test, y_test) = datasets.mnist.load_data()
     #normalize
     x = x/255.0
     x_test = x_test/255.0
-    
+
+
     return (x, y), (x_test, y_test)
 
-
 # ## Demo numpy based auto differentiation
-
 # In[3]:
-
-
 import numpy as np
 
+# 定义矩阵乘法层
 class Matmul:
     def __init__(self):
         self.mem = {}
         
     def forward(self, x, W):
+        # 前向传播：执行矩阵乘法，计算 h = x @ W
         h = np.matmul(x, W)
-        self.mem={'x': x, 'W':W}
+        # 缓存输入 x 和 权重 W，以便在反向传播中计算梯度
+        self.mem = {'x': x, 'W':W}
+        # 缓存输入 x 和 权重 W，以便在反向传播中计算梯度
         return h
     
     def backward(self, grad_y):
@@ -44,25 +49,26 @@ class Matmul:
         w: shape(d, d')
         grad_y: shape(N, d')
         '''
+       # 反向传播计算 x 和 W 的梯度
         x = self.mem['x']
         W = self.mem['W']
         
-        ####################
         '''计算矩阵乘法的对应的梯度'''
         grad_x = np.matmul(grad_y, W.T)
         grad_W = np.matmul(x.T, grad_y)
-        ####################
+      
         return grad_x, grad_W
 
-
+# 定义 ReLU 激活层
 class Relu:
     def __init__(self):
         self.mem = {}
-        
+        #初始化记忆字典，用于存储前向传播的输入
     def forward(self, x):
-        self.mem['x']=x
+        #保存输入x，供反向传播使用
+        self.mem['x'] = x
         return np.where(x > 0, x, np.zeros_like(x))
-    
+    #ReLU激活函数：x>0时输出x，否则输出0
     def backward(self, grad_y):
         '''
         grad_y: same shape as x
@@ -74,6 +80,7 @@ class Relu:
         ####################
         return grad_x
 
+# 定义 Softmax 层（输出概率）
 class Softmax:
     '''
     softmax over last dimention
@@ -86,10 +93,15 @@ class Softmax:
         '''
         x: shape(N, c)
         '''
+        # 对输入数据应用指数函数，确保所有值为正
         x_exp = np.exp(x)
+        # 计算每个样本的归一化分母（分区函数）
         partition = np.sum(x_exp, axis=1, keepdims=True)
+        # 计算 softmax 输出：指数值 / 分区函数
+        # 添加 epsilon 防止除零错误（数值稳定性）
         out = x_exp/(partition+self.epsilon)
-        
+
+        # 将计算结果存入内存字典，用于反向传播
         self.mem['out'] = out
         self.mem['x_exp'] = x_exp
         return out
@@ -100,12 +112,16 @@ class Softmax:
         '''
         s = self.mem['out']
         sisj = np.matmul(np.expand_dims(s,axis=2), np.expand_dims(s, axis=1)) # (N, c, c)
+        # 对grad_y进行维度扩展
+        # 假设grad_y是一个形状为(N, c)的梯度张量
+        # np.expand_dims(grad_y, axis=1)将其形状变为(N, 1, c)
         g_y_exp = np.expand_dims(grad_y, axis=1)
         tmp = np.matmul(g_y_exp, sisj) #(N, 1, c)
         tmp = np.squeeze(tmp, axis=1)
         tmp = -tmp + grad_y * s 
         return tmp
     
+# 定义 Log 层（计算 log softmax ，用于交叉熵）
 class Log:
     '''
     softmax over last dimention
@@ -134,7 +150,6 @@ class Log:
 # ## Gradient check
 
 # In[5]:
-
 
 # import tensorflow as tf
 
@@ -208,36 +223,34 @@ class Log:
 #     grads = tape.gradient(loss, x)
 #     print (grads)
 
-
 # # Final Gradient Check
 
 # In[6]:
 
 import tensorflow as tf
 
-label = np.zeros_like(x)
+label = np.zeros_like(x) #创建了一个与x形状相同的全零标签矩阵
 label[0, 1]=1.
 label[1, 0]=1
 label[2, 3]=1
 label[3, 5]=1
 label[4, 0]=1
 
-x = np.random.normal(size=[5, 6])
-W1 = np.random.normal(size=[6, 5])
-W2 = np.random.normal(size=[5, 6])
+x = np.random.normal(size = [5, 6]) # 5个样本，每个样本6维特征
+W1 = np.random.normal(size = [6, 5]) # 第一层权重 (6→5)
+W2 = np.random.normal(size = [5, 6]) # 第二层权重 (5→6)
 
-mul_h1 = Matmul()
-mul_h2 = Matmul()
-relu = Relu()
+mul_h1 = Matmul() # 第一层矩阵乘法
+mul_h2 = Matmul() # 第二层矩阵乘法
+relu = Relu() # ReLU激活函数
 softmax = Softmax()
-log = Log()
+log = Log() # 对数函数
 
 h1 = mul_h1.forward(x, W1) # shape(5, 4)
 h1_relu = relu.forward(h1)
 h2 = mul_h2.forward(h1_relu, W2)
 h2_soft = softmax.forward(h2)
 h2_log = log.forward(h2_soft)
-
 
 h2_log_grad = log.backward(label)
 h2_soft_grad = softmax.backward(h2_log_grad)
@@ -262,28 +275,25 @@ with tf.GradientTape() as tape:
     grads = tape.gradient(loss, [prob])
     print (grads[0].numpy())
 
-
 # ## 建立模型
 
 # In[10]:
 
-
 class myModel:
     def __init__(self):
         
-        self.W1 = np.random.normal(size=[28*28+1, 100])
-        self.W2 = np.random.normal(size=[100, 10])
+        self.W1 = np.random.normal(size=[28*28+1, 100])  # 输入层到隐藏层，增加偏置项
+        self.W2 = np.random.normal(size=[100, 10])       # 输入层到隐藏层，增加偏置项
         
         self.mul_h1 = Matmul()
         self.mul_h2 = Matmul()
         self.relu = Relu()
         self.softmax = Softmax()
         self.log = Log()
-        
-        
+                
     def forward(self, x):
-        x = x.reshape(-1, 28*28)
-        bias = np.ones(shape=[x.shape[0], 1])
+        x = x.reshape(-1, 28*28)  # 展平图像
+        bias = np.ones(shape=[x.shape[0], 1])  # 添加偏置项
         x = np.concatenate([x, bias], axis=1)
         
         self.h1 = self.mul_h1.forward(x, self.W1) # shape(5, 4)
@@ -301,11 +311,9 @@ class myModel:
         
 model = myModel()
 
-
 # ## 计算 loss
 
 # In[11]:
-
 
 def compute_loss(log_prob, labels):
      return np.mean(np.sum(-log_prob*labels, axis=1))
@@ -315,6 +323,7 @@ def compute_accuracy(log_prob, labels):
     truth = np.argmax(labels, axis=1)
     return np.mean(predictions==truth)
 
+# 单步训练函数
 def train_one_step(model, x, y):
     model.forward(x)
     model.backward(y)
@@ -324,6 +333,7 @@ def train_one_step(model, x, y):
     accuracy = compute_accuracy(model.h2_log, y)
     return loss, accuracy
 
+# 测试函数
 def test(model, x, y):
     model.forward(x)
     loss = compute_loss(model.h2_log, y)

@@ -8,7 +8,11 @@
 # In[19]:
 
 
+# 导入NumPy库，用于科学计算和数组操作
+# NumPy提供了高性能的多维数组对象和各种数学运算工具
 import numpy as np
+# 导入TensorFlow库，用于机器学习和深度学习任务
+# TensorFlow是一个开源的端到端机器学习平台
 import tensorflow as tf
 import collections
 from tensorflow import keras
@@ -29,6 +33,7 @@ import string
 def randomString(stringLength):
     """Generate a random string with the combination of lowercase and uppercase letters """
 
+
     letters = string.ascii_uppercase
     return ''.join(random.choice(letters) for i in range(stringLength))
 
@@ -43,17 +48,18 @@ print(get_batch(2, 10))
 
 
 # # 建立sequence to sequence 模型
-# 
+# ##
 # 完成两空，模型搭建以及单步解码逻辑
 
 # In[26]:
 
-
+# 定义了一个名为 mySeq2SeqModel 的类，继承自 keras.Model
+#调用父类 keras.Model 的初始化方法
 class mySeq2SeqModel(keras.Model):
     def __init__(self):
         super(mySeq2SeqModel, self).__init__()
-        self.v_sz=27
-        self.hidden = 128
+        self.v_sz=27 # 词汇表大小（包括可能的特殊符号）
+        self.hidden = 128 # 隐藏层维度/RNN单元的大小
         self.embed_layer = tf.keras.layers.Embedding(self.v_sz, 64, 
                                                     batch_input_shape=[None, None])
         
@@ -76,24 +82,8 @@ class mySeq2SeqModel(keras.Model):
         完成带attention机制的 sequence2sequence 模型的搭建，模块已经在`__init__`函数中定义好，
         用双线性attention，或者自己改一下`__init__`函数做加性attention
         '''
-        enc_emb = self.embed_layer(enc_ids)
-        enc_outputs, enc_state = self.encoder(enc_emb)
-        
-        # Decoder
-        dec_emb = self.embed_layer(dec_ids)
-        dec_outputs, _ = self.decoder(dec_emb, initial_state=enc_state)
-        
-        # Attention
-        scores = tf.matmul(dec_outputs, enc_outputs, transpose_b=True)
-        attn_weights = tf.nn.softmax(scores, axis=-1)
-        context = tf.matmul(attn_weights, enc_outputs)
-        combined = tf.concat([dec_outputs, context], axis=-1)
-        
-        # Generate logits
-        attn_output = self.dense_attn(combined)
-        logits = self.dense(attn_output)
         return logits
-       
+    
     
     @tf.function
     def encode(self, enc_ids):
@@ -109,28 +99,11 @@ class mySeq2SeqModel(keras.Model):
         '''
         todo
         参考sequence_reversal-exercise, 自己构建单步解码逻辑'''
-        emb_x = self.embed_layer(x)
-        
-        # RNN step
-        output, new_state = self.decoder_cell(emb_x, state)
-        
-        # Attention
-        output_expanded = tf.expand_dims(output, 1)
-        scores = tf.matmul(output_expanded, enc_out, transpose_b=True)
-        scores = tf.squeeze(scores, axis=1)
-        attn_weights = tf.nn.softmax(scores, axis=1)
-        context = tf.matmul(tf.expand_dims(attn_weights, 1), enc_out)
-        context = tf.squeeze(context, axis=1)
-        
-        # Combine and predict
-        combined = tf.concat([output, context], axis=-1)
-        attn_output = self.dense_attn(combined)
-        logits = self.dense(attn_output)
-        return tf.argmax(logits, axis=-1, output_type=tf.int32), new_state
+        return out, state
 
 
 # # Loss函数以及训练逻辑
-
+ ##
 # In[27]:
 
 
