@@ -9,8 +9,6 @@
 # #### '<font color="red">*</font>' 从高斯分布采样  (X, Y) ~ N(7, 7, 1, 1, 0)<br>
 
 # In[1]:
-
-
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
@@ -20,7 +18,6 @@ import matplotlib.cm as cm
 import numpy as np
 
 # get_ipython().run_line_magic('matplotlib', 'inline')
-
 # 设置数据点数量
 dot_num = 100  
 # 从均值为3，标准差为1的高斯分布中采样x坐标，用于正样本
@@ -62,7 +59,6 @@ data_set = np.concatenate((C1, C2, C3), axis=0)
 # 随机打乱数据集的顺序
 np.random.shuffle(data_set)
 
-
 # ## 建立模型
 # 建立模型类，定义loss函数，定义一步梯度下降过程函数
 #
@@ -72,9 +68,7 @@ np.random.shuffle(data_set)
 
 # In[1]:
 
-
 epsilon = 1e-12  # 防止 log(0)，处理数值稳定性问题
-
 
 class SoftmaxRegression(tf.Module):
     def __init__(self, input_dim=2, num_classes=3):
@@ -140,7 +134,6 @@ def compute_loss(pred, labels, num_classes=3):
     
     return loss, acc
 
-
 @tf.function
 def train_one_step(model, optimizer, x_batch, y_batch):
     """
@@ -159,11 +152,9 @@ def train_one_step(model, optimizer, x_batch, y_batch):
     optimizer.apply_gradients(zip(grads, model.trainable_variables))
     return loss, accuracy
 
-
 # ### 实例化一个模型，进行训练
 
 # In[12]:
-
 
 model = SoftmaxRegression()
 # 创建一个 SoftmaxRegression 模型实例 model
