@@ -6,6 +6,11 @@ def load_data(fname):
 
     """
     载入数据。
+    参数:
+        fname (str): 数据文件的路径
+    返回:
+        np.array: 加载的数据，形状为 (n_samples, 3)，
+                 其中每行是 [x1, x2, t]，t是标签（0或1）
     """
     with open(fname, 'r') as f:
         data = []
@@ -22,6 +27,11 @@ def load_data(fname):
 def eval_acc(label, pred):
     """
     计算准确率。
+    参数:
+        label (np.array): 真实标签，形状为 (n_samples,)
+        pred (np.array): 预测标签，形状为 (n_samples,)
+    返回:
+        float: 准确率（正确预测的比例）
     """
     return np.sum(label == pred) / len(pred)
 
