@@ -80,16 +80,12 @@ class linearModel(Model):
         """
         y = tf.squeeze(tf.matmul(x, self.w), axis=1)
         return y
-
-
-(xs, ys), (o_x, o_y) = load_data("train.txt")        
-ndim = xs.shape[1]
-
-model = linearModel(ndim=ndim)
-
-
-# ## 训练以及评估
-optimizer = optimizers.Adam(0.1)
+        (xs, ys), (o_x, o_y) = load_data("train.txt")        
+        ndim = xs.shape[1]
+        model = linearModel(ndim=ndim)
+        
+        # ## 训练以及评估
+        optimizer = optimizers.Adam(0.1)
 
 
 @tf.function
