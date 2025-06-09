@@ -14,10 +14,16 @@ def load_data(filename):
     Returns:
         tuple: 包含特征和标签的numpy数组 (xs, ys)
     """
-    xys = []
-    with open(filename, "r") as f:
-        for line in f:
+    xys = []  # 初始化空列表，用于临时存储所有数据行（特征和标签的组合）
+    with open(filename, "r") as f:# 以只读模式打开文件
+        for line in f:# 逐行读取文件内容
             # 将每行内容按空格分割并转换为浮点数
+            # 处理每行数据：
+                # 1. line.strip() 移除行首尾的空白字符（包括换行符）
+                # 2. split() 默认按任意空白字符分割字符串
+                # 3. map(float, ...) 将分割后的每个字符串转换为浮点数
+                # 4. list() 将映射结果转换为列表
+                # 例如: "1.0 2.0 3.0 0" -> [1.0, 2.0, 3.0, 0.0]
             line_data = list(map(float, line.strip().split()))
             xys.append(line_data)
     # 将数据拆分为特征和标签
